@@ -39,3 +39,42 @@ class Event:
         else:
             reminder_not_found_error()
 
+class Day:
+    def __init__(self, date_: datetime.date):
+        self.date_ = date_
+        self.slots: dict[datetime.time, str | None] = {}
+        self._init_slots()
+
+    def _init_slots(self) -> None:
+        for hour in range(24):
+            for minute in range(0, 60, 15):
+                self.slots[time(hour, minute)] = None
+
+    def add_event(self, event_id: str, start_at: datetime.time, end_at: datetime.time) -> None:
+        for slot in self.slots:
+            if start_at <= slot < end_at:
+                if self.slots[slot]:
+                    slot_not_available_error()
+                else:
+                    self.slots[slot] = event_id
+
+    def delete_event(self, event_id: str) -> None:
+        deleted = False
+        for slot, saved_id in self.slots.items():
+            if saved_id == event_id:
+                self.slots[slot] = None
+                deleted = True
+        if not deleted:
+            event_not_found_error()
+
+    def update_event(self, event_id: str, start_at: datetime.time, end_at: datetime.time) -> None:
+        for slot in self.slots:
+            if self.slots[slot] == event_id:
+                self.slots[slot] = None
+
+        for slot in self.slots:
+            if start_at <= slot < end_at:
+                if self.slots[slot]:
+                    slot_not_available_error()
+                else:
+                    self.slots[slot] = event_id
